@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>電気図記号カタログ (JIS C 0617)</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --border: #d0d5dd;
+      --text: #1a1a2e;
+      --bg: #f5f7fa;
+      --card-bg: #ffffff;
+      --accent: #1a73e8;
+    }
+    body { font-family: 'Segoe UI', sans-serif; font-size: 13px; color: var(--text); background: var(--bg); padding: 20px; }
+
+    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    h1 { font-size: 18px; }
+    h1 small { font-size: 12px; color: #666; font-weight: normal; margin-left: 8px; }
+    .actions { display: flex; gap: 8px; }
+    button {
+      padding: 6px 16px; border-radius: 5px; border: 1px solid var(--border);
+      cursor: pointer; font-size: 13px; background: #fff;
+    }
+    button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .group { margin-bottom: 28px; }
+    .group-title {
+      font-size: 14px; font-weight: 600; color: var(--accent);
+      border-bottom: 2px solid var(--accent); padding-bottom: 4px; margin-bottom: 12px;
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+    .card {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px;
+      padding: 12px 8px 8px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .card svg { width: 100px; height: 70px; }
+    .card .name { font-size: 11px; text-align: center; color: #444; line-height: 1.4; }
+    .card .id { font-size: 10px; color: #999; font-family: monospace; }
+
+    /* SVGシンボルスタイル */
+    .component-symbol { stroke: #1a1a2e; stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .component-symbol .filled { fill: #1a1a2e; }
+    .component-label { font-size: 11px; fill: #1a1a2e; font-family: 'Segoe UI', sans-serif; }
+
+    /* 接続点マーカー */
+    .conn-point { fill: #fff; stroke: #1a73e8; stroke-width: 1; r: 3; }
+
+    @media print {
+      body { background: white; padding: 10px; }
+      header .actions { display: none; }
+      .card { break-inside: avoid; }
+      .group { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>電気図記号カタログ <small>JIS C 0617 準拠 / 単線図用</small></h1>
+    <div class="actions">
+      <button onclick="window.print()" class="primary">印刷 / PDF出力</button>
+      <button onclick="location.href='index.html'">← エディタに戻る</button>
+    </div>
+  </header>
+  <div id="catalog"></div>
+
+  <script type="module">
+    import { SYMBOL_GROUPS, renderSymbol, getConnectionPoints } from './js/symbols.js';
+
+    const catalog = document.getElementById('catalog');
+
+    for (const group of SYMBOL_GROUPS) {
+      const section = document.createElement('div');
+      section.className = 'group';
+
+      const title = document.createElement('div');
+      title.className = 'group-title';
+      title.textContent = group.label;
+      section.appendChild(title);
+
+      const grid = document.createElement('div');
+      grid.className = 'grid';
+
+      for (const item of group.items) {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        // SVG描画
+        const { minX, minY, maxX, maxY } = item.bbox;
+        const pad = 8;
+        const vbX = minX - pad, vbY = minY - pad;
+        const vbW = maxX - minX + pad * 2;
+        const vbH = maxY - minY + pad * 2;
+
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', `${vbX} ${vbY} ${vbW} ${vbH}`);
+
+        // シンボル描画
+        const sym = renderSymbol(item.id);
+        if (sym) svg.appendChild(sym);
+
+        // 接続点（四方向）を表示
+        const connPts = getConnectionPoints(item, 0, 0, 0);
+        for (const pt of connPts) {
+          const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          c.setAttribute('cx', pt.x); c.setAttribute('cy', pt.y); c.setAttribute('r', 3);
+          c.setAttribute('class', 'conn-point');
+          svg.appendChild(c);
+        }
+
+        const name = document.createElement('div');
+        name.className = 'name';
+        name.textContent = item.label;
+
+        const id = document.createElement('div');
+        id.className = 'id';
+        id.textContent = item.id;
+
+        card.appendChild(svg);
+        card.appendChild(name);
+        card.appendChild(id);
+        grid.appendChild(card);
+      }
+
+      section.appendChild(grid);
+      catalog.appendChild(section);
+    }
+  </script>
+</body>
+</html>

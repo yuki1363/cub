@@ -1,0 +1,250 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f0f2f5;
+  --panel-bg: #ffffff;
+  --border: #d0d5dd;
+  --accent: #1a73e8;
+  --accent-hover: #1558b0;
+  --text: #1a1a2e;
+  --text-muted: #6b7280;
+  --header-h: 48px;
+  --toolbar-h: 36px;
+  --status-h: 24px;
+  --palette-w: 200px;
+  --props-w: 220px;
+  --grid-color: #d8dde6;
+  --wire-color: #1a1a2e;
+  --select-color: #1a73e8;
+}
+
+html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', sans-serif; font-size: 13px; color: var(--text); background: var(--bg); }
+
+#app { display: flex; flex-direction: column; height: 100vh; }
+
+/* ヘッダー */
+#header {
+  height: var(--header-h);
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 16px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,.2);
+}
+#header h1 { font-size: 15px; font-weight: 600; white-space: nowrap; }
+
+#toolbar { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+#toolbar button {
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.3);
+  color: #fff;
+  border-radius: 4px;
+  padding: 3px 9px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background .15s;
+}
+#toolbar button:hover { background: rgba(255,255,255,.3); }
+#toolbar button:disabled { opacity: .4; cursor: default; }
+.sep { width: 1px; height: 20px; background: rgba(255,255,255,.3); margin: 0 4px; }
+
+/* メイン */
+#main { display: flex; flex: 1; overflow: hidden; }
+
+/* パレット */
+#palette {
+  width: var(--palette-w);
+  background: var(--panel-bg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.palette-search { padding: 8px; border-bottom: 1px solid var(--border); }
+.palette-search input { width: 100%; padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; }
+#palette-groups { overflow-y: auto; flex: 1; padding: 4px 0; }
+.palette-group-header {
+  padding: 4px 10px;
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.palette-group-header:hover { background: #f5f7fa; }
+.palette-group-header .arrow { font-size: 10px; transition: transform .15s; }
+.palette-group-header.collapsed .arrow { transform: rotate(-90deg); }
+.palette-group-items { display: flex; flex-direction: column; }
+.palette-group-items.hidden { display: none; }
+.palette-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  cursor: grab;
+  user-select: none;
+  border-radius: 4px;
+  margin: 0 4px;
+}
+.palette-item:hover { background: #e8f0fe; }
+.palette-item svg { width: 40px; height: 30px; flex-shrink: 0; }
+.palette-item span { font-size: 12px; line-height: 1.3; }
+
+/* キャンバスエリア */
+#canvas-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+#canvas-toolbar {
+  height: var(--toolbar-h);
+  background: var(--panel-bg);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 10px;
+  flex-shrink: 0;
+  font-size: 12px;
+}
+#canvas-toolbar label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+#canvas-toolbar select { border: 1px solid var(--border); border-radius: 3px; padding: 2px 4px; font-size: 12px; }
+#canvas-toolbar button {
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+#canvas-toolbar button:hover { background: #f0f0f0; }
+#zoom-label { min-width: 40px; text-align: center; font-size: 12px; }
+
+#canvas-container {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  cursor: default;
+}
+#diagram-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* プロパティ */
+#properties {
+  width: var(--props-w);
+  background: var(--panel-bg);
+  border-left: 1px solid var(--border);
+  padding: 10px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+#properties h3 { font-size: 13px; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.no-selection { color: var(--text-muted); font-size: 12px; }
+.prop-row { margin-bottom: 8px; }
+.prop-row label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+.prop-row input, .prop-row select, .prop-row textarea {
+  width: 100%; border: 1px solid var(--border); border-radius: 4px; padding: 4px 6px; font-size: 12px;
+}
+.prop-row textarea { resize: vertical; height: 60px; }
+
+/* ステータスバー */
+#statusbar {
+  height: var(--status-h);
+  background: var(--panel-bg);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 24px;
+  font-size: 11px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+#status-filename { margin-left: auto; }
+
+/* SVG描画スタイル */
+.grid-line { stroke: var(--grid-color); stroke-width: 0.5; }
+.component-symbol { stroke: var(--wire-color); stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.component-symbol.filled { fill: var(--wire-color); }
+.component-label { font-size: 11px; fill: var(--text); font-family: 'Segoe UI', sans-serif; }
+.wire-line { stroke: var(--wire-color); stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.wire-preview { stroke: var(--accent); stroke-width: 1.5; fill: none; stroke-dasharray: 4,3; }
+.connection-point { fill: #fff; stroke: var(--accent); stroke-width: 1.5; }
+.connection-point.active { fill: var(--accent); }
+.selection-box { stroke: var(--select-color); stroke-width: 1; fill: rgba(26,115,232,.08); stroke-dasharray: 4,3; }
+.selected-overlay { stroke: var(--select-color); stroke-width: 1.5; fill: rgba(26,115,232,.08); rx: 3; }
+.handle { fill: var(--select-color); stroke: #fff; stroke-width: 1.5; cursor: move; }
+.junction-dot { fill: var(--wire-color); }
+.text-label { font-size: 12px; fill: var(--text); font-family: 'Segoe UI', sans-serif; cursor: move; }
+.drag-ghost { opacity: .5; pointer-events: none; }
+
+/* ダイアログ */
+dialog {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.15);
+  min-width: 280px;
+}
+dialog::backdrop { background: rgba(0,0,0,.3); }
+dialog form { display: flex; flex-direction: column; gap: 12px; }
+dialog label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+dialog input[type=text] { border: 1px solid var(--border); border-radius: 4px; padding: 6px 8px; font-size: 13px; }
+dialog div { display: flex; gap: 8px; justify-content: flex-end; }
+dialog button {
+  padding: 6px 16px; border-radius: 4px; border: 1px solid var(--border);
+  cursor: pointer; font-size: 13px; background: #fff;
+}
+dialog button[type=submit], dialog #confirm-ok {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+}
+
+/* スマホ対応：閲覧のみ */
+@media (max-width: 768px) {
+  #palette, #properties, #toolbar, #canvas-toolbar { display: none; }
+  #header { justify-content: center; }
+  #canvas-container { cursor: default !important; }
+  #diagram-svg { pointer-events: none; }
+}
+
+/* PDF印刷 */
+@media print {
+  #header, #palette, #properties, #canvas-toolbar, #statusbar { display: none !important; }
+  #main { display: block; height: 100vh; }
+  #canvas-area { height: 100vh; }
+  #canvas-container { overflow: visible; }
+  #diagram-svg {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  .selected-overlay, .handle, .connection-point, .selection-box, .wire-preview { display: none !important; }
+  body { background: white; }
+}
+
+/* ワイヤー選択ハイライト */
+.wire-selected { stroke: #1a73e8 !important; stroke-width: 2.5 !important; }
+.text-selected { fill: #1a73e8 !important; }
+.wire-label { font-size: 10px; fill: #444; font-family: 'Segoe UI', sans-serif; text-anchor: middle; }
+
+/* 回転ハンドル */
+.rotation-handle {
+  fill: #1a73e8;
+  stroke: #fff;
+  stroke-width: 1.5;
+  cursor: grab;
+  r: 7;
+}
+.rotation-handle:hover { fill: #1558b0; }
+.rotation-handle:active { cursor: grabbing; }
+
+/* 回転中カーソル */
+body.rotating { cursor: grabbing !important; }
+body.rotating * { cursor: grabbing !important; }

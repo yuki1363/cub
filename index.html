@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>単相結線図エディタ</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- ヘッダー -->
+    <header id="header">
+      <h1>単相結線図エディタ</h1>
+      <div id="toolbar">
+        <button id="btn-new" title="新規">新規</button>
+        <button id="btn-open" title="開く">開く</button>
+        <button id="btn-save" title="上書き保存">保存</button>
+        <button id="btn-saveas" title="名前を付けて保存">名前を付けて保存</button>
+        <span class="sep"></span>
+        <button id="btn-export-svg" title="SVGエクスポート">SVG出力</button>
+        <button id="btn-export-png" title="PNGエクスポート">PNG出力</button>
+        <span class="sep"></span>
+        <button id="btn-undo" title="元に戻す (Ctrl+Z)">↩ 元に戻す</button>
+        <button id="btn-redo" title="やり直し (Ctrl+Y)">↪ やり直し</button>
+        <span class="sep"></span>
+        <button id="btn-delete" title="削除 (Del)">削除</button>
+        <button id="btn-select-all" title="全選択 (Ctrl+A)">全選択</button>
+        <input type="hidden" id="file-input" accept=".cub,.json">
+      </div>
+    </header>
+
+    <!-- メインエリア -->
+    <div id="main">
+      <!-- 部品パレット -->
+      <aside id="palette">
+        <div class="palette-search">
+          <input type="text" id="palette-search-input" placeholder="部品を検索...">
+        </div>
+        <div id="palette-groups"></div>
+      </aside>
+
+      <!-- キャンバスエリア -->
+      <div id="canvas-area">
+        <div id="canvas-toolbar">
+          <label>
+            <input type="radio" name="mode" value="select" checked> 選択
+          </label>
+          <label>
+            <input type="radio" name="mode" value="wire"> 配線
+          </label>
+          <label>
+            <input type="radio" name="mode" value="text"> テキスト
+          </label>
+          <span class="sep"></span>
+          <label>グリッド:
+            <select id="grid-size">
+              <option value="10">10px</option>
+              <option value="20" selected>20px</option>
+              <option value="40">40px</option>
+            </select>
+          </label>
+          <label>
+            <input type="checkbox" id="grid-snap" checked> スナップ
+          </label>
+          <span class="sep"></span>
+          <button id="btn-zoom-in">＋</button>
+          <span id="zoom-label">100%</span>
+          <button id="btn-zoom-out">－</button>
+          <button id="btn-zoom-fit">全体表示</button>
+        </div>
+        <div id="canvas-container">
+          <svg id="diagram-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+      </div>
+
+      <!-- プロパティパネル -->
+      <aside id="properties">
+        <h3>プロパティ</h3>
+        <div id="properties-content">
+          <p class="no-selection">部品を選択してください</p>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ステータスバー -->
+    <footer id="statusbar">
+      <span id="status-mode">モード: 選択</span>
+      <span id="status-pos">X: 0  Y: 0</span>
+      <span id="status-selection">選択: なし</span>
+      <span id="status-filename">無題</span>
+    </footer>
+  </div>
+
+  <!-- テキスト入力ダイアログ -->
+  <dialog id="text-dialog">
+    <form method="dialog">
+      <label>テキスト: <input type="text" id="text-input" autocomplete="off"></label>
+      <div>
+        <button type="submit">OK</button>
+        <button type="button" id="text-cancel">キャンセル</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 確認ダイアログ -->
+  <dialog id="confirm-dialog">
+    <p id="confirm-message"></p>
+    <div>
+      <button id="confirm-ok">OK</button>
+      <button id="confirm-cancel">キャンセル</button>
+    </div>
+  </dialog>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
