@@ -281,14 +281,32 @@ export class Editor {
   // --- 配線確定 ---
   _commitWire() {
     if (this.wirePoints.length < 2) { this.wirePoints = []; return; }
-    // 直角配線に変換
-    const pts = this._makeOrthogonal(this.wirePoints);
+    // 端点を接続点にスナップ（グリッドずれを吸収）
+    const wps = this.wirePoints.slice();
+    wps[0] = this._snapPtToConnPoint(wps[0]);
+    wps[wps.length - 1] = this._snapPtToConnPoint(wps[wps.length - 1]);
+    const pts = this._makeOrthogonal(wps);
     addWire(this.diagram, pts);
     this.wirePoints = [];
     this.wirePreview = null;
     this._saveHistory();
     this.onUpdate(this.diagram, 'add-wire');
     this._redraw();
+  }
+
+  // 点の最寄り接続点を返す（radius 以内になければ元の点を返す）
+  _snapPtToConnPoint(pt, radius = 14) {
+    let best = null, bestDist = radius;
+    for (const comp of this.diagram.components) {
+      const def = getSymbolDef(comp.symbolId);
+      if (!def) continue;
+      const conns = getConnectionPoints(def, comp.x, comp.y, comp.rotation);
+      for (const cp of conns) {
+        const d = Math.hypot(pt.x - cp.x, pt.y - cp.y);
+        if (d < bestDist) { bestDist = d; best = { x: cp.x, y: cp.y }; }
+      }
+    }
+    return best || pt;
   }
 
   _makeOrthogonal(pts) {
@@ -410,7 +428,7 @@ export class Editor {
 
   // 接続点座標と一致するワイヤー端点を移動
   _dragConnectedWireEndpoints(oldConns, dx, dy) {
-    const TOL = 3;
+    const TOL = 6;
     for (const wire of this.diagram.wires) {
       if (this.selectedIds.has(wire.id)) continue;
       for (const pt of wire.points) {
