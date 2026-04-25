@@ -1,6 +1,6 @@
 // 編集インタラクション（マウス・キーボード操作）
 import { addComponent, addWire, addText, removeElements, moveComponents, moveWire, rotateComponent, getById } from './diagram.js';
-import { getSymbolDef } from './symbols.js';
+import { getSymbolDef, getConnectionPoints } from './symbols.js';
 
 export class Editor {
   constructor(svgEl, renderer, diagram, history, onUpdate) {
@@ -154,8 +154,17 @@ export class Editor {
       for (const id of this.selectedIds) {
         const comp = this.diagram.components.find(c => c.id === id);
         if (comp) {
-          comp.x = this._snap(comp.x + dx);
-          comp.y = this._snap(comp.y + dy);
+          const def = getSymbolDef(comp.symbolId);
+          const oldConns = def ? getConnectionPoints(def, comp.x, comp.y, comp.rotation) : [];
+          const newX = this._snap(comp.x + dx);
+          const newY = this._snap(comp.y + dy);
+          const actualDx = newX - comp.x;
+          const actualDy = newY - comp.y;
+          comp.x = newX;
+          comp.y = newY;
+          if ((actualDx !== 0 || actualDy !== 0) && oldConns.length) {
+            this._dragConnectedWireEndpoints(oldConns, actualDx, actualDy);
+          }
           continue;
         }
         moveWire(this.diagram, id, dx, dy);
@@ -397,6 +406,23 @@ export class Editor {
 
   _saveHistory() {
     this.history.push(JSON.stringify(this.diagram));
+  }
+
+  // 接続点座標と一致するワイヤー端点を移動
+  _dragConnectedWireEndpoints(oldConns, dx, dy) {
+    const TOL = 3;
+    for (const wire of this.diagram.wires) {
+      if (this.selectedIds.has(wire.id)) continue;
+      for (const pt of wire.points) {
+        for (const cp of oldConns) {
+          if (Math.abs(pt.x - cp.x) <= TOL && Math.abs(pt.y - cp.y) <= TOL) {
+            pt.x += dx;
+            pt.y += dy;
+            break;
+          }
+        }
+      }
+    }
   }
 
   // 回転ハンドルのヒットテスト（DOM要素から直接検索）
